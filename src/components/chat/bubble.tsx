@@ -105,136 +105,21 @@ export default function Bubble({
 }
 
 
-
-// export function PlayAIAudio({ aiResponse }: { aiResponse: string }) {
-//   const audioContext = new AudioContext();
-//   const audioElement = new Audio();
-//   audioElement.controls = true;
-
-//   const [playingResponse, setPlayingResponse] = useState<boolean>(false)
-//   const [loading, setLoading] = useState<boolean>(false)
-
-//   const stopLoading = () => {
-//     setPlayingResponse(false);
-//     setLoading(false);
-//   };
-
-//   URL.revokeObjectURL(audioElement.src);
-//   const generateAudio = async () => {
-//     try {
-//       let modelId = "eleven_multilingual_v2";
-//       let voiceId = "21m00Tcm4TlvDq8ikWAM";
-
-//       // generate audio from openai response
-//       const response = await fetch(
-//         `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`,
-//         {
-//           method: "POST",
-//           headers: {
-//             accept: "audio/mpeg",
-//             "Content-Type": "application/json",
-//             "xi-api-key": process.env
-//               .NEXT_PUBLIC_ELEVENLABS_API_KEY as string,
-//           },
-//           body: JSON.stringify({
-//             text: aiResponse,
-//             model_id: modelId,
-//           }),
-//         },
-//       );
-//       return { response, ok: response.ok };
-//     } catch (e) {
-//       console.error("Error generating audio", e);
-//     }
-//   };
-
-//   const playAIResponse = async () => {
-//     setLoading(true)
-//     const elevenLabsRes = await generateAudio();
-
-//     if (!elevenLabsRes || !elevenLabsRes.ok) {
-//       const error = await elevenLabsRes?.response.json();
-//       console.error("Error generating audio:", error);
-//       throw new Error("Error generating audio");
-//     }
-//     const elevenlabsBody = elevenLabsRes.response.body;
-
-//     if (!elevenlabsBody) {
-//       throw new Error("Error generating audio");
-//     }
-//     // stream the response
-//     const audioBuffer = await new Response(
-//       elevenlabsBody,
-//     ).arrayBuffer();
-
-//     const audioSource = audioContext.createBufferSource();
-
-//     audioContext.decodeAudioData(audioBuffer, async (buffer) => {
-//       audioSource.buffer = buffer;
-//       audioSource.connect(audioContext.destination);
-//       const words = aiResponse.split(" ");
-
-//       // setAiTextResponse({ text: aiResponse, words });
-//       audioSource.onended = () => stopLoading();
-//       audioSource.start();
-//       setPlayingResponse(true);
-//     });
-
-//   }
-
-//   return (
-//     <Button className={playingResponse ? "animate-bounce" : loading ? "animate-spin" : ""} onClick={async () => await playAIResponse()} disabled={loading}>
-//       <PlayCircle className="mr-2 h-4 w-4" />
-//     </Button>
-//   )
-// }
-
 export function PlayAIAudio({ aiResponse }: { aiResponse: string }) {
-  const audioContext = useRef(new AudioContext());
-  const audioElement = useRef(new Audio());
-  const audioSource = useRef<AudioBufferSourceNode | null>(null);
+  let modelId = "eleven_multilingual_v2";
+  let voiceId = "21m00Tcm4TlvDq8ikWAM";
 
+  const mediaSource = useRef(new MediaSource());
+  const audioElement = useRef(new Audio());
+  const [playingResponse, setPlayingResponse] = useState<boolean>(false);
+
+  audioElement.current.src = URL.createObjectURL(mediaSource.current);
   audioElement.current.controls = true;
 
-  const [playingResponse, setPlayingResponse] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-
   const stopAudio = () => {
-    if (audioSource.current) {
-      audioSource.current.stop();
-      audioSource.current = null;
-    }
+    audioElement.current.pause();
+    audioElement.current.currentTime = 0;
     setPlayingResponse(false);
-    setLoading(false);
-  };
-
-  URL.revokeObjectURL(audioElement.current.src);
-  const generateAudio = async () => {
-    try {
-      let modelId = "eleven_multilingual_v2";
-      let voiceId = "21m00Tcm4TlvDq8ikWAM";
-
-      // generate audio from openai response
-      const response = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`,
-        {
-          method: "POST",
-          headers: {
-            accept: "audio/mpeg",
-            "Content-Type": "application/json",
-            "xi-api-key": process.env
-              .NEXT_PUBLIC_ELEVENLABS_API_KEY as string,
-          },
-          body: JSON.stringify({
-            text: aiResponse,
-            model_id: modelId,
-          }),
-        },
-      );
-      return { response, ok: response.ok };
-    } catch (e) {
-      console.error("Error generating audio", e);
-    }
   };
 
   const playAIResponse = async () => {
@@ -243,39 +128,76 @@ export function PlayAIAudio({ aiResponse }: { aiResponse: string }) {
       return;
     }
 
-    setLoading(true)
-    const elevenLabsRes = await generateAudio();
-    setLoading(false)
-    setPlayingResponse(true)
+    setPlayingResponse(true);
 
-    if (!elevenLabsRes || !elevenLabsRes.ok) {
-      const error = await elevenLabsRes?.response.json();
-      console.error("Error generating audio:", error);
-      throw new Error("Error generating audio");
+    const response = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`,
+      {
+        method: "POST",
+        headers: {
+          accept: "audio/mpeg",
+          "Content-Type": "application/json",
+          "xi-api-key": process.env
+            .NEXT_PUBLIC_ELEVENLABS_API_KEY as string,
+        },
+        body: JSON.stringify({
+          text: aiResponse,
+          model_id: modelId,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      // Handle response error (e.g., rate limit) here
+      console.error('Error fetching audio:', response.statusText);
+      setPlayingResponse(false);
+      return;
     }
 
-    const elevenlabsBody = elevenLabsRes.response.body;
+    const reader = response.body.getReader();
 
-    if (!elevenlabsBody) {
-      throw new Error("Error generating audio");
+    // Ensure the media source is in an 'open' state
+    if (mediaSource.current.readyState !== 'open') {
+      console.error('Media source not open');
+      return;
     }
 
-    const audioBuffer = await new Response(elevenlabsBody).arrayBuffer();
+    const sourceBuffer = mediaSource.current.addSourceBuffer('audio/mpeg');
 
-    audioSource.current = audioContext.current.createBufferSource();
-    audioContext.current.decodeAudioData(audioBuffer, async (buffer) => {
-      if (audioSource.current) {
-        audioSource.current.buffer = buffer;
-        audioSource.current.connect(audioContext.current.destination);
-        audioSource.current.onended = () => stopAudio();
-        audioSource.current.start();
-        setPlayingResponse(true);
+    const pump = async () => {
+      const { value, done } = await reader.read();
+
+      if (done) {
+        // Safeguard against media source not being open
+        if (mediaSource.current.readyState === 'open') {
+          mediaSource.current.endOfStream();
+        }
+        return;
       }
+
+      // Safeguard against source buffer removal
+      if (sourceBuffer.updating || mediaSource.current.readyState !== 'open') {
+        await new Promise(resolve => sourceBuffer.addEventListener('updateend', resolve, { once: true }));
+      }
+
+      sourceBuffer.appendBuffer(value);
+      await pump(); // recursively call the pump to fetch the next chunk
+    };
+
+    audioElement.current.play().catch(e => {
+      console.error('Play request was interrupted:', e.message);
+      setPlayingResponse(false);
+    });
+
+    // Start the pump to fetch and append data
+    pump().catch(e => {
+      console.error('Error while fetching and appending audio chunks:', e.message);
+      setPlayingResponse(false);
     });
   };
 
   return (
-    <Button disabled={loading} onClick={async () => await playAIResponse()}>
+    <Button onClick={async () => await playAIResponse()}>
       {playingResponse ? (
         <X className="mr-2 h-4 w-4" />
       ) : (

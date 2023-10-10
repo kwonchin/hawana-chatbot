@@ -17,11 +17,26 @@ import Bubble from "./chat/bubble";
 import { welcomeMessage } from "@/lib/strings";
 
 export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat();
+  const examples = [
+    "What hotels are there in Hawana Salalah?",
+    "What is there to do in Hawana Salalah?",
+    "How much can I expect to pay staying in Hawana Salalah?",
+  ];
+
+  const {
+    messages,
+    input,
+    setInput,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+  } = useChat();
 
   // Create a reference to the scroll area
   const scrollAreaRef = useRef<null | HTMLDivElement>(null);
+
+  // Create a reference to the input
+  const inputRef = useRef<null | HTMLInputElement>(null);
 
   useEffect(() => {
     // Scroll to the bottom when the messages change
@@ -34,7 +49,7 @@ export default function Chat() {
   }, [messages]);
 
   return (
-    <Card className="w-[500px]">
+    <Card className="w-[550px]">
       <CardHeader>
         <CardTitle className="text-lg">Ask me anything!</CardTitle>
         <CardDescription className=" leading-3">
@@ -53,6 +68,22 @@ export default function Chat() {
               id: "initialai",
             }}
           />
+          { messages.length === 0 && (
+            <div className="flex flex-col space-y-4 border-t border-gray-200 bg-gray-50 p-7 sm:p-10">
+              {examples.map((example, i) => (
+                <button
+                  key={i}
+                  className="rounded-md border border-gray-200 bg-white px-5 py-3 text-left text-sm text-gray-500 transition-all duration-75 hover:border-black hover:text-gray-700 active:bg-gray-50"
+                  onClick={() => {
+                    setInput(example);
+                    inputRef.current?.focus();
+                  }}
+                >
+                  {example}
+                </button>
+              ))}
+            </div>
+          )}
           {messages.map((message) => (
             <Bubble key={message.id} message={message} />
           ))}
@@ -64,6 +95,7 @@ export default function Chat() {
           className="flex items-center justify-center w-full space-x-2"
         >
           <Input
+            ref={inputRef}
             placeholder="Type your message"
             value={input}
             onChange={handleInputChange}

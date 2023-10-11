@@ -152,7 +152,7 @@ export default function RecordingButton(props: ComponentProps) {
     });
     if (mediaRecorder) {
       mediaRecorder.stop();
-      startLoading();
+      stopLoading();
     }
   };
 

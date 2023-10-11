@@ -5,6 +5,14 @@ import { PlayCircle, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { useRef } from "react";
 
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
+
+
 
 export function PlayAIAudio({ aiResponse }: { aiResponse: string }) {
 
@@ -36,7 +44,7 @@ export function PlayAIAudio({ aiResponse }: { aiResponse: string }) {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({aiResponse}),
+                body: JSON.stringify({ aiResponse }),
             });
 
 
@@ -90,12 +98,23 @@ export function PlayAIAudio({ aiResponse }: { aiResponse: string }) {
     };
 
     return (
-        <Button onClick={async () => await playAIResponse()}>
-            {playingResponse ? (
-                <X className="mr-2 h-4 w-4" />
-            ) : (
-                <PlayCircle className="mr-2 h-4 w-4" />
-            )}
-        </Button>
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    {playingResponse ? (
+                        <X className="mr-2 h-4 w-4 hover:animate-pulse cursor-pointer" onClick={async () => await playAIResponse()} />
+                    ) : (
+                        <PlayCircle className="mr-2 h-4 w-4 hover:animate-pulse cursor-pointer" onClick={async () => await playAIResponse()} />
+                    )}        
+                </TooltipTrigger>
+                <TooltipContent>
+
+                {playingResponse ? (
+                        <p>Stop</p>
+                    ) : (
+                        <p>Click to play</p>
+                    )}                  </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
     );
 }

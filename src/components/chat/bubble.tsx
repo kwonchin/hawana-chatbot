@@ -68,22 +68,35 @@ export default function Bubble({
       )}
 
       <div className="leading-relaxed">
+        <div className="flex flex-row items-center space-x-2">
+
         <span className="block font-bold text-gray-700">
           {message.role === "user" ? "You" : "AI"}{" "}
         </span>
-        {!loading && (<ReactMarkdown
-          className="prose mt-1 w-full break-words prose-p:leading-relaxed"
-          remarkPlugins={[remarkGfm]}
-          components={{
-            // open links in new tab
-            a: (props) => (
-              <a {...props} target="_blank" rel="noopener noreferrer" />
-            ),
-          }}
-        >
-          {message.content}
-        </ReactMarkdown>)}
+
         <PlayAIAudio aiResponse={message.content} />
+
+        </div>
+
+        {!loading && (
+
+          <div>
+            
+            <ReactMarkdown
+              className="prose mt-1 w-full break-words prose-p:leading-relaxed"
+              remarkPlugins={[remarkGfm]}
+              components={{
+                // open links in new tab
+                a: (props) => (
+                  <a {...props} target="_blank" rel="noopener noreferrer" />
+                ),
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+          </div>
+
+        )}
         {loading && (
           <Grid
             height={12}

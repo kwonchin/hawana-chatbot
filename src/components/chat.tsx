@@ -16,6 +16,7 @@ import { Grid } from "react-loader-spinner";
 import Bubble from "./chat/bubble";
 import { welcomeMessage } from "@/lib/strings";
 import ExampleQuestions from "./chat/example-questions";
+import RecordingButton from "./recording-button";
 
 export default function Chat() {
   const {
@@ -84,6 +85,7 @@ export default function Chat() {
             value={input}
             onChange={handleInputChange}
           />
+          <RecordingButton language="en" setInputText={setInput} />
           <Button disabled={isLoading}>
             {isLoading ? (
               <div className="flex gap-2 items-center">

@@ -15,7 +15,6 @@ export default function Bubble({
   message: Message;
   loading?: boolean;
 }) {
-  console.log(message.content)
   return (
     <div
       key={message.id}

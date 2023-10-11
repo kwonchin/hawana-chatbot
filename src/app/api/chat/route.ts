@@ -49,5 +49,7 @@ export async function POST(req: Request) {
     conversation_id: conversation_id.conversation_id,
   });
 
+  // TODO: Add onToken handler, catch the source / metadata stuff and attach to data - access on frontend through useChat
+
   return new StreamingTextResponse(stream);
 }

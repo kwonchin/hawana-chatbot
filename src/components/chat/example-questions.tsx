@@ -10,9 +10,9 @@ interface ExampleQuestionsProps {
 
 export default function ExampleQuestions({ messages, setInput, inputRef }: ExampleQuestionsProps) {
   const examples = [
-    "What hotels are there in Hawana Salalah?",
+    "What is Hawana Salalah?",
     "What is there to do in Hawana Salalah?",
-    "How much can I expect to pay staying in Hawana Salalah?",
+    "What hotels are available and how much do they cost?",
   ];
 
   return (

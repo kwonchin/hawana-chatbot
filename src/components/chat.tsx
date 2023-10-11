@@ -15,6 +15,7 @@ import { useChat } from "ai/react";
 import { Grid } from "react-loader-spinner";
 import Bubble from "./chat/bubble";
 import { welcomeMessage } from "@/lib/strings";
+import ExampleQuestions from "./chat/example-questions";
 import RecordingButton from "./recording-button";
 
 export default function Chat() {
@@ -30,6 +31,9 @@ export default function Chat() {
   // Create a reference to the scroll area
   const scrollAreaRef = useRef<null | HTMLDivElement>(null);
 
+  // Create a reference to the input
+  const inputRef = useRef<null | HTMLInputElement>(null);
+
   useEffect(() => {
     // Scroll to the bottom when the messages change
     if (scrollAreaRef.current) {
@@ -41,7 +45,7 @@ export default function Chat() {
   }, [messages]);
 
   return (
-    <Card className="w-[500px]">
+    <Card className="w-[550px]">
       <CardHeader>
         <CardTitle className="text-lg">Ask me anything!</CardTitle>
         <CardDescription className=" leading-3">
@@ -60,6 +64,11 @@ export default function Chat() {
               id: "initialai",
             }}
           />
+          <ExampleQuestions
+            messages={messages}
+            setInput={setInput}
+            inputRef={inputRef}
+          />
           {messages.map((message) => (
             <Bubble key={message.id} message={message} />
           ))}
@@ -71,6 +80,7 @@ export default function Chat() {
           className="flex items-center justify-center w-full space-x-2"
         >
           <Input
+            ref={inputRef}
             placeholder="Type your message"
             value={input}
             onChange={handleInputChange}

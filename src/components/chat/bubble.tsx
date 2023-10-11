@@ -3,11 +3,10 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Message } from "ai";
 import { Grid } from "react-loader-spinner";
-import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm"
 import Image from "next/image";
-
+import { PlayAIAudio } from "./play-ai-response";
 
 export default function Bubble({
   message,
@@ -69,7 +68,7 @@ export default function Bubble({
         </Avatar>
       )}
 
-      <p className="leading-relaxed">
+      <div className="leading-relaxed">
         <span className="block font-bold text-gray-700">
           {message.role === "user" ? "You" : "AI"}{" "}
         </span>
@@ -85,6 +84,7 @@ export default function Bubble({
         >
           {message.content}
         </ReactMarkdown>)}
+        <PlayAIAudio aiResponse={message.content} />
         {loading && (
           <Grid
             height={12}
@@ -95,7 +95,7 @@ export default function Bubble({
             ms-visible={true}
           />
         )}
-      </p>
+      </div>
     </div>
   );
 }

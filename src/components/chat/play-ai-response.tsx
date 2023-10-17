@@ -48,7 +48,7 @@ export function PlayAIAudio({ aiResponse }: { aiResponse: string }) {
             });
 
 
-        if (!response.ok) {
+        if (!response.ok || response == null || response.body == null) {
             // Handle response error (e.g., rate limit) here
             console.error('Error fetching audio:', response.statusText);
             setPlayingResponse(false);

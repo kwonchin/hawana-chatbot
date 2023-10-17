@@ -5,6 +5,12 @@ export interface MendableStreamCallbacks extends AIStreamCallbacksAndOptions {
   onToken?: (data: string) => Promise<void>;
 }
 
+interface MendableMetadata {
+  id: string;
+  content: string;
+  link: string;
+}
+
 function parseMendableStream(): (data: string) => string | void {
   return (data) => {
     const parsedData = JSON.parse(data);
@@ -16,7 +22,7 @@ function parseMendableStream(): (data: string) => string | void {
       return;
     }
     if (chunk === "<|source|>") {
-      const links = parsedData.metadata.map((meta) => { return meta.link;})
+      const links = parsedData.metadata.map((meta: MendableMetadata) => { return meta.link;})
       let formattedString = "\n**Verifed Sources:**"
       links.forEach((link: string) => { formattedString += `\n- ${link}` })
       formattedString += "\n --- \n"

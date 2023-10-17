@@ -83,7 +83,7 @@ export default function Bubble({
           <div>
             
             <ReactMarkdown
-              className="prose mt-1 w-full break-words prose-p:leading-relaxed"
+              className="prose mt-1 w-full break-words prose-p:leading-relaxed tighter-hr"
               remarkPlugins={[remarkGfm]}
               components={{
                 // open links in new tab

@@ -14,42 +14,44 @@ export async function POST(req: Request) {
 
   const url = "https://api.mendable.ai/v0/newConversation";
 
-  const data = {
+  const mendableBody = {
     api_key: process.env.MENDABLE_API_KEY,
   };
-
-  const r = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  const conversation_id = await r.json();
-
-
-  const history = [];
-  for (let i = 0; i < messages.length; i += 2) {
-    history.push({
-      prompt: messages[i].content,
-      response: messages[i + 1].content,
+  try {
+    const r = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(mendableBody),
     });
+
+    const conversation_id = await r.json();
+
+    const history = [];
+    for (let i = 0; i < messages.length; i += 2) {
+      history.push({
+        prompt: messages[i].content,
+        response: messages[i + 1].content,
+      });
+    }
+
+    history.unshift({
+      prompt: "",
+      response: welcomeMessage,
+    });
+
+    const { aiStream, streamData } = await MendableStream({
+      api_key: process.env.MENDABLE_API_KEY,
+      question: question,
+      history: history,
+      conversation_id: conversation_id.conversation_id,
+    });
+    
+    // return new StreamingTextResponse(aiStream, {}, streamData);
+    // TODO: once this is api is working, we already have logic to update the data in mentable_stream.ts
+    return new StreamingTextResponse(aiStream);
+  } catch (e) {
+    console.log(e);
   }
-
-  history.unshift({
-    prompt: "",
-    response: welcomeMessage,
-  });
-
-  const stream = await MendableStream({
-    api_key: process.env.MENDABLE_API_KEY,
-    question: question,
-    history: history,
-    conversation_id: conversation_id.conversation_id,
-  });
-
-  // TODO: Add onToken handler, catch the source / metadata stuff and attach to data - access on frontend through useChat
-
-  return new StreamingTextResponse(stream);
 }

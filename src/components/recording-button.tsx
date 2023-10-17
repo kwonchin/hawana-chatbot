@@ -205,7 +205,7 @@ export default function RecordingButton(props: ComponentProps) {
       ) : (
         <div className="text-md w-full relative">
           {isRecording ? (
-            <Button onClick={stopRecording} className="w-8 h-8 rounded-full p-0">
+            <Button type="button" onClick={stopRecording} className="w-8 h-8 rounded-full p-0">
               <LazyMotion features={domAnimation}>
                 <m.div
                   key="recording"
@@ -228,7 +228,7 @@ export default function RecordingButton(props: ComponentProps) {
               </LazyMotion>
             </Button>
           ) : (
-            <Button onClick={startRecording} className="w-8 h-8 rounded-full p-0">
+            <Button type="button" onClick={startRecording} className="w-8 h-8 rounded-full p-0">
               <Mic className="w-4 h-4 text-white" />
             </Button>
           )}

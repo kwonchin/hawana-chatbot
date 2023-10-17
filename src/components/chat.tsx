@@ -26,6 +26,8 @@ export default function Chat() {
     handleInputChange,
     handleSubmit,
     isLoading,
+    metadata,
+    data
   } = useChat();
 
   // Create a reference to the scroll area

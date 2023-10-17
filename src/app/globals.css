@@ -76,3 +76,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+.tighter-hr hr {
+  margin-top: 0.7rem;
+  margin-bottom: 1rem;
+}

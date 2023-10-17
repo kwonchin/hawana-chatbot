@@ -1,7 +1,8 @@
-import { AIStream, AIStreamCallbacks } from "ai";
+import { AIStream, AIStreamCallbacksAndOptions, experimental_StreamData } from "ai";
 
-export interface MendableStreamCallbacks extends AIStreamCallbacks {
+export interface MendableStreamCallbacks extends AIStreamCallbacksAndOptions {
   onMessage?: (data: string) => Promise<void>;
+  onToken?: (data: string) => Promise<void>;
 }
 
 function parseMendableStream(): (data: string) => string | void {
@@ -15,16 +16,11 @@ function parseMendableStream(): (data: string) => string | void {
       return;
     }
     if (chunk === "<|source|>") {
-
-      let links = parsedData.metadata.map((meta) => {
-        return meta.link
-      })
-
-      let sources = "**For more information:**\n"
-      links.forEach((link) => {sources += `- ${link}\n`})
-      sources += "\n"
-
-      return sources;
+      const links = parsedData.metadata.map((meta) => { return meta.link;})
+      let formattedString = "\n**Verifed Sources:**"
+      links.forEach((link: string) => { formattedString += `\n- ${link}` })
+      formattedString += "\n --- \n"
+      return formattedString
     }
     if (chunk) {
       return chunk;
@@ -50,5 +46,26 @@ export async function MendableStream(
     throw new Error("Response error: " + (await response.text()));
   }
 
-  return AIStream(response, parseMendableStream(), callbacks);
+  // Instantiate the data
+  const streamData = new experimental_StreamData();
+
+
+  const aiStream = AIStream(response, parseMendableStream(), {
+    ...callbacks,
+    onToken(message) {
+      if (typeof(message) === "object") {
+        // console.log("appending message", message)
+        // streamData.append(message);
+      }
+    },
+    onFinal(completion) {
+      console.log("closing stream data")
+      // streamData.close();
+    },
+    experimental_streamData: true,
+  });
+  return {
+    aiStream,
+    streamData,
+  }
 }
